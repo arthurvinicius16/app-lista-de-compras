@@ -1,6 +1,5 @@
 import tkinter as tk
 from tkinter import messagebox
-import json
 
 # Variáveis globais
 lista_compras = []  # Inicializa uma lista de compras vazia
@@ -29,18 +28,11 @@ def adicionar_item():
     if item and quantidade and preço:
         try:
             quantidade = int(quantidade)
-            if item in lista_compras:
-                lista_compras[item] += quantidade
-            else:
-                lista_compras[item] = quantidade
+            preço=float(preço).replace(",", ".")
+            novo_item = {'nome':item, 'qntd':quantidade, 'preço':preço, 'comprado':False}
+            for i in lista_compras:
+                if novo_item.strip().lower().replace("-", " ")==i["nome"].strip().lower().replace("-", " "):
 
-            entrada_item.delete(0, tk.END)
-            entrada_quantidade.delete(0, tk.END)
-            exibir_lista()
-            messagebox.showinfo(
-                "Sucesso",
-                f"{str(quantidade)}x '{item}' adicionado(s) com sucesso à sua lista.",
-            )
         except ValueError:
             messagebox.showerror(
                 "Erro", "Por favor, insira um número válido para a quantidade."

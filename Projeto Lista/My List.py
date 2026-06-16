@@ -1,17 +1,19 @@
 import tkinter as tk
 from tkinter import messagebox
+import json
 
 # Variáveis globais
-lista_compras = {}  # Inicializa uma lista de compras vazia
+lista_compras = []  # Inicializa uma lista de compras vazia
 entrada_item = None
 entrada_quantidade = None
+entrada_preço = None
 caixa_lista = None
 
 
 # Função para exibir a lista de compras na tela
 def exibir_lista():
     caixa_lista.delete(0, tk.END)
-    for item, quantidade in lista_compras.items():
+    for item in lista_compras:
         caixa_lista.insert(
             tk.END, f"- {item} (Quantidade: {str(quantidade)})"
         )
@@ -19,11 +21,12 @@ def exibir_lista():
 
 # Função para adicionar un item à lista de compras
 def adicionar_item():
-    global entrada_item, entrada_quantidade
+    global entrada_item, entrada_quantidade, entrada_preço
     item = entrada_item.get()
     quantidade = entrada_quantidade.get()
+    preço = entrada_preço.get()
 
-    if item and quantidade:
+    if item and quantidade and preço:
         try:
             quantidade = int(quantidade)
             if item in lista_compras:

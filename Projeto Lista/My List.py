@@ -1,6 +1,5 @@
 import tkinter as tk
 from tkinter import messagebox
-import json
 
 # Variáveis globais
 lista_compras = []  # Inicializa uma lista de compras vazia

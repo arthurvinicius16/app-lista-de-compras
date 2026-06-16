@@ -1,8 +1,9 @@
 import tkinter as tk
+import json
 from tkinter import messagebox
 
 # Variáveis globais
-lista_compras = {}  # Inicializa uma lista de compras vazia
+lista_compras = [] # Inicializa uma lista de compras vazia
 entrada_item = None
 entrada_quantidade = None
 caixa_lista = None
@@ -49,21 +50,34 @@ def adicionar_item():
 
 
 # Função para remover um item da lista de compras
-def remover_item():
-    global entrada_item
-    item = entrada_item.get()
 
-    if item in lista_compras:
-        del lista_compras[item]
+    else:def remover_item():
+    global entrada_item
+    item_para_remover = None
+
+    #1.Primeiro,verifica se o usuário seleciounou algum item clicando na listbox
+    selecao = caixa_lista.curselection()
+    if selecao:
+        texto_linha = caixa_lista.get(selecao[0])
+        #Extrai o nome do item limpando o formato "- Item (Quantidade: X)"
+        item_para_remover = texto_linha.split("(")[0].replace("-","").strip()
+    else:
+        # 2. Se não clicou na lista,pega o que foi digitado no campo de texto
+        item_para_remover = entrada_item.get().strip()
+
+    # Execulta a remoção se o item for válido e existir
+    if item_para_remover in lista_compras:
+        del lista_compras[item_para_remover]
         entrada_item.delete(0, tk.END)
         exibir_lista()
         messagebox.showinfo(
-            "Sucesso", f"'{item}' foi removido da sua lista de compras."
+            "Sucesso",f"'{item_para_remover}' foi removido da sua lista de compras."
         )
-    else:
         messagebox.showerror(
-            "Erro", f"'{item}' não foi encontrado na sua lista."
+            "Error",
+            "Selecione um item na lista visual ou digite o nome exato para remover."
         )
+
 
 
 # Função para calcular o total de todos os itens somados

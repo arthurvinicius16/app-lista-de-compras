@@ -55,7 +55,7 @@ def adicionar_item():
     global entrada_item
     item_para_remover = None
 
-    #1.Primeiro,verifica se o usuário seleciounou algum item clicando na listbox
+    #1.Primeiro,verifica se o usuário seleciounou  item clicando na listbox
     selecao = caixa_lista.curselection()
     if selecao:
         texto_linha = caixa_lista.get(selecao[0])

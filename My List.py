@@ -6,34 +6,39 @@ from tkinter import messagebox
 lista_compras = [] # Inicializa uma lista de compras vazia
 entrada_item = None
 entrada_quantidade = None
-entrada_preco = None
+entrada_valor = None
 caixa_lista = None
 
 
 # Função para exibir a lista de compras na tela
 def exibir_lista():
+    global caixa_lista
     caixa_lista.delete(0, tk.END)
-    for item, quantidade in lista_compras.items():
-        caixa_lista.insert(
-            tk.END, f"- {item} (Quantidade: {str(quantidade)})"
-        )
+    for item in lista_compras:
+        if item['comprado']==True:
+            status="✅"
+        else:
+            status="❌"
+        texto= f"{status} {item['nome']} | {item['quantidade']} un | R${item['valor']:.2f}"
+        caixa_lista.insert(tk.END, texto)
 
 
 # Função para Acrescentar Itens
 def adicionar_item():
-    global entrada_item, entrada_quantidade, entrada_preco
-    nome_digitado=entrada_item.get()
+    global entrada_item, entrada_quantidade, entrada_valor
+    nome_digitado=entrada_item.get().strip() #ele recebe a string da caixa de texto (.get) e remove espaços desnecessários, como no fim e início (.strip)
     quantidade=entrada_quantidade.get()
-    preco=entrada_preco.get()
-    if nome_digitado and quantidade and preco:
+    valor=entrada_valor.get()
+    if nome_digitado and quantidade and valor:
         try:
             quantidade=int(quantidade)
-            preco=float(preço)
-            novo_item={'nome':nome_digitado,'quantidade':quantidade,'preço':preco, 'comprado':False}
+            valor=float(valor)
+            novo_item={'nome':nome_digitado,'quantidade':quantidade,'valor':valor, 'comprado':False}
             lista_compras.append(novo_item)
+            exibir_lista()
             entrada_item.delete(0, tk.END)
             entrada_quantidade.delete(0, tk.END)
-            entrada_preco.delete(0, tk.END)
+            entrada_valor.delete(0, tk.END)
             messagebox.showinfo("Sucesso",f"O item {nome_digitado} foi adicionado com sucesso.")
         except ValueError:
             messagebox.showerror("Erro","Insira caracteres válidos nos campos Quantidade e Preço (somente números)")
@@ -81,7 +86,7 @@ def calcular_total():
 
 # Função principal que constrói a interface
 def main():
-    global entrada_item, entrada_quantidade, caixa_lista, entrada_preco
+    global entrada_item, entrada_quantidade, caixa_lista, entrada_valor
     janela = tk.Tk()
     janela.title("Lista de Compras")
 
@@ -110,10 +115,10 @@ def main():
     entrada_quantidade.grid(row=1, column=1, padx=5, pady=5)
 
     #Campo: Preço
-    label_preco = tk.Label(frame_conteudo, text="Preço")
-    label_preco.grid(row=2, column=0, padx=5, pady=5, sticky="e")
-    entrada_preco = tk.Entry(frame_conteudo)
-    entrada_preco.grid(row=2, column=1, padx=5, pady=5)
+    label_valor = tk.Label(frame_conteudo, text="Preço")
+    label_valor.grid(row=2, column=0, padx=5, pady=5, sticky="e")
+    entrada_valor = tk.Entry(frame_conteudo)
+    entrada_valor.grid(row=2, column=1, padx=5, pady=5)
 
     # Botão: Adicionar
     botao_adicionar = tk.Button(
@@ -131,26 +136,18 @@ def main():
         row=4, column=0, columnspan=2, padx=5, pady=5, sticky="we"
     )
 
-    # Botão: Atualizar/Exibir
-    botao_exibir = tk.Button(
-        frame_conteudo, text="Atualizar Lista", command=exibir_lista
-    )
-    botao_exibir.grid(
-        row=5, column=0, columnspan=2, padx=5, pady=5, sticky="we"
-    )
-
     # Botão: Calcular Total
     botao_calcular = tk.Button(
         frame_conteudo, text="Calcular Total Geral", command=calcular_total
     )
     botao_calcular.grid(
-        row=6, column=0, columnspan=2, padx=5, pady=5, sticky="we"
+        row=5, column=0, columnspan=2, padx=5, pady=5, sticky="we"
     )
 
     # Listbox: Onde a lista aparece na tela
     caixa_lista = tk.Listbox(frame_conteudo)
     caixa_lista.grid(
-        row=7, column=0, columnspan=2, padx=5, pady=5, sticky="nsew"
+        row=6, column=0, columnspan=2, padx=5, pady=5, sticky="nsew"
     )
 
     janela.mainloop()

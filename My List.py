@@ -6,6 +6,7 @@ from tkinter import messagebox
 lista_compras = [] # Inicializa uma lista de compras vazia
 entrada_item = None
 entrada_quantidade = None
+entrada_preco = None
 caixa_lista = None
 
 
@@ -18,40 +19,30 @@ def exibir_lista():
         )
 
 
-# Função para adicionar un item à lista de compras
+# Função para Acrescentar Itens
 def adicionar_item():
-    global entrada_item, entrada_quantidade
-    item = entrada_item.get()
-    quantidade = entrada_quantidade.get()
-
-    if item and quantidade:
+    global entrada_item, entrada_quantidade, entrada_preco
+    nome_digitado=entrada_item.get()
+    quantidade=entrada_quantidade.get()
+    preco=entrada_preco.get()
+    if nome_digitado and quantidade and preco:
         try:
-            quantidade = int(quantidade)
-            if item in lista_compras:
-                lista_compras[item] += quantidade
-            else:
-                lista_compras[item] = quantidade
-
+            quantidade=int(quantidade)
+            preco=float(preço)
+            novo_item={'nome':nome_digitado,'quantidade':quantidade,'preço':preco, 'comprado':False}
+            lista_compras.append(novo_item)
             entrada_item.delete(0, tk.END)
             entrada_quantidade.delete(0, tk.END)
-            exibir_lista()
-            messagebox.showinfo(
-                "Sucesso",
-                f"{str(quantidade)}x '{item}' adicionado(s) com sucesso à sua lista.",
-            )
+            entrada_preco.delete(0, tk.END)
+            messagebox.showinfo("Sucesso",f"O item {nome_digitado} foi adicionado com sucesso.")
         except ValueError:
-            messagebox.showerror(
-                "Erro", "Por favor, insira um número válido para a quantidade."
-            )
+            messagebox.showerror("Erro","Insira caracteres válidos nos campos Quantidade e Preço (somente números)")
     else:
-        messagebox.showerror(
-            "Erro", "Por favor, preencha tanto o item quanto a quantidade."
-        )
-
+        messagebox.showerror("Erro","Por favor, preencha todos os campos (Item, Quantidade e Preço)")
 
 # Função para remover um item da lista de compras
 
-    else:def remover_item():
+def remover_item():
     global entrada_item
     item_para_remover = None
 
@@ -90,7 +81,7 @@ def calcular_total():
 
 # Função principal que constrói a interface
 def main():
-    global entrada_item, entrada_quantidade, caixa_lista
+    global entrada_item, entrada_quantidade, caixa_lista, entrada_preco
     janela = tk.Tk()
     janela.title("Lista de Compras")
 
@@ -118,12 +109,18 @@ def main():
     entrada_quantidade = tk.Entry(frame_conteudo)
     entrada_quantidade.grid(row=1, column=1, padx=5, pady=5)
 
+    #Campo: Preço
+    label_preco = tk.Label(frame_conteudo, text="Preço")
+    label_preco.grid(row=2, column=0, padx=5, pady=5, sticky="e")
+    entrada_preco = tk.Entry(frame_conteudo)
+    entrada_preco.grid(row=2, column=1, padx=5, pady=5)
+
     # Botão: Adicionar
     botao_adicionar = tk.Button(
         frame_conteudo, text="Adicionar Item", command=adicionar_item
     )
     botao_adicionar.grid(
-        row=2, column=0, columnspan=2, padx=5, pady=5, sticky="we"
+        row=3, column=0, columnspan=2, padx=5, pady=5, sticky="we"
     )
 
     # Botão: Remover
@@ -131,7 +128,7 @@ def main():
         frame_conteudo, text="Remover Item", command=remover_item
     )
     botao_remover.grid(
-        row=3, column=0, columnspan=2, padx=5, pady=5, sticky="we"
+        row=4, column=0, columnspan=2, padx=5, pady=5, sticky="we"
     )
 
     # Botão: Atualizar/Exibir
@@ -139,7 +136,7 @@ def main():
         frame_conteudo, text="Atualizar Lista", command=exibir_lista
     )
     botao_exibir.grid(
-        row=4, column=0, columnspan=2, padx=5, pady=5, sticky="we"
+        row=5, column=0, columnspan=2, padx=5, pady=5, sticky="we"
     )
 
     # Botão: Calcular Total
@@ -147,13 +144,13 @@ def main():
         frame_conteudo, text="Calcular Total Geral", command=calcular_total
     )
     botao_calcular.grid(
-        row=5, column=0, columnspan=2, padx=5, pady=5, sticky="we"
+        row=6, column=0, columnspan=2, padx=5, pady=5, sticky="we"
     )
 
     # Listbox: Onde a lista aparece na tela
     caixa_lista = tk.Listbox(frame_conteudo)
     caixa_lista.grid(
-        row=6, column=0, columnspan=2, padx=5, pady=5, sticky="nsew"
+        row=7, column=0, columnspan=2, padx=5, pady=5, sticky="nsew"
     )
 
     janela.mainloop()

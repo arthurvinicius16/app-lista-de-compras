@@ -10,7 +10,7 @@ entrada_valor = None
 caixa_lista = None
 
 
-# Função para exibir a lista de compras na tela
+# Função de Exibir/Atualizar a Lista
 def exibir_lista():
     global caixa_lista
     caixa_lista.delete(0, tk.END)
@@ -22,8 +22,8 @@ def exibir_lista():
         texto= f"{status} {item['nome']} | {item['quantidade']} un | R${item['valor']:.2f}"
         caixa_lista.insert(tk.END, texto)
 
-
 # Função para Acrescentar Itens
+
 def adicionar_item():
     global entrada_item, entrada_quantidade, entrada_valor
     nome_digitado=entrada_item.get().strip() #ele recebe a string da caixa de texto (.get) e remove espaços desnecessários, como no fim e início (.strip)
@@ -36,6 +36,7 @@ def adicionar_item():
             novo_item={'nome':nome_digitado,'quantidade':quantidade,'valor':valor, 'comprado':False}
             lista_compras.append(novo_item)
             exibir_lista()
+            calcular_total()
             entrada_item.delete(0, tk.END)
             entrada_quantidade.delete(0, tk.END)
             entrada_valor.delete(0, tk.END)
@@ -45,50 +46,38 @@ def adicionar_item():
     else:
         messagebox.showerror("Erro","Por favor, preencha todos os campos (Item, Quantidade e Preço)")
 
-# Função para remover um item da lista de compras
+# Função de Remover Item
 
 def remover_item():
-    global entrada_item
-    item_para_remover = None
-
-    #1.Primeiro,verifica se o usuário seleciounou  item clicando na listbox
     selecao = caixa_lista.curselection()
     if selecao:
-        texto_linha = caixa_lista.get(selecao[0])
-        #Extrai o nome do item limpando o formato "- Item (Quantidade: X)"
-        item_para_remover = texto_linha.split("(")[0].replace("-","").strip()
+       indice=selecao[0]
+       item_removido=lista_compras.pop(indice)
+       exibir_lista()
+       calcular_total()
+       messagebox.showinfo("Sucesso", f"{item_removido['nome']} foi removido da lista")
+
     else:
-        # 2. Se não clicou na lista,pega o que foi digitado no campo de texto
-        item_para_remover = entrada_item.get().strip()
-
-    # Execulta a remoção se o item for válido e existir
-    if item_para_remover in lista_compras:
-        del lista_compras[item_para_remover]
-        entrada_item.delete(0, tk.END)
-        exibir_lista()
-        messagebox.showinfo(
-            "Sucesso",f"'{item_para_remover}' foi removido da sua lista de compras."
-        )
-        messagebox.showerror(
-            "Error",
-            "Selecione um item na lista visual ou digite o nome exato para remover."
-        )
+        messagebox.showerror("Erro", "Selecione um item para removê-lo")
 
 
-
-# Função para calcular o total de todos os itens somados
+# Função para Calcular a Quantidade de Itens e o Preço Total
 def calcular_total():
-    total = sum(lista_compras.values())
-    messagebox.showinfo(
-        "Total de Itens", f"Quantidade total de itens na lista: {str(total)}"
-    )
+    soma_valor=0.0
+    soma_itens=0
+    for item in lista_compras:
+        soma_valor+=item['quantidade']*item['valor']
+        soma_itens+=item['quantidade']
+    texto_total.set(f"Itens: {soma_itens}un | Preço Total: R${soma_valor:.2f}")
 
 
 # Função principal que constrói a interface
 def main():
-    global entrada_item, entrada_quantidade, caixa_lista, entrada_valor
+    global entrada_item, entrada_quantidade, caixa_lista, entrada_valor, texto_total
     janela = tk.Tk()
     janela.title("Lista de Compras")
+    texto_total = tk.StringVar()
+    texto_total.set("Itens: 0 un | Preço Total: R$0.00")
 
     # Título principal da interface
     frame_titulo = tk.Frame(janela)
@@ -149,6 +138,10 @@ def main():
     caixa_lista.grid(
         row=6, column=0, columnspan=2, padx=5, pady=5, sticky="nsew"
     )
+
+    #Rodapé da Quantidade e Preço Total
+    label_rodape = tk.Label(frame_conteudo, textvariable=texto_total, font=("Helvetica", 10, "bold"))
+    label_rodape.grid(row=7, column=0, columnspan=2, padx=5, pady=5, sticky="ew")
 
     janela.mainloop()
 

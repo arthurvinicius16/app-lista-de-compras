@@ -1,6 +1,7 @@
 import tkinter as tk
 import json
 from tkinter import messagebox
+import unicodedata
 
 # Variáveis globais
 lista_compras = [] # Inicializa uma lista de compras vazia
@@ -9,6 +10,12 @@ entrada_quantidade = None
 entrada_valor = None
 caixa_lista = None
 
+#Função para tornar a palavra inserida uma string sem espaços desnecessários, sem acento e totalmente minúscula
+def normalizar(texto):
+    texto=texto.strip().lower().replace(" ", "")
+    texto=unicodedata.normalize("NFKD", texto)
+    texto=texto.encode("ascii", "ignore").decode("utf-8")
+    return texto
 
 # Função de Exibir/Atualizar a Lista
 def exibir_lista():
@@ -26,14 +33,27 @@ def exibir_lista():
 
 def adicionar_item():
     global entrada_item, entrada_quantidade, entrada_valor
-    nome_digitado=entrada_item.get().strip() #ele recebe a string da caixa de texto (.get) e remove espaços desnecessários, como no fim e início (.strip)
+    nome_digitado=entrada_item.get() #ele recebe a string da caixa de texto (.get) e remove espaços desnecessários, como no fim e início (.strip)
     quantidade=entrada_quantidade.get()
-    valor=entrada_valor.get()
+    valor=entrada_valor.get().replace(",",".")
     if nome_digitado and quantidade and valor:
         try:
             quantidade=int(quantidade)
             valor=float(valor)
-            novo_item={'nome':nome_digitado,'quantidade':quantidade,'valor':valor, 'comprado':False}
+            item_busca=normalizar(nome_digitado)
+            for item in lista_compras:
+                item_existe=normalizar(item['nome'])
+                if item_existe == item_busca:
+                    item['quantidade']+=quantidade
+                    item['valor']=valor
+                    exibir_lista()
+                    calcular_total()
+                    entrada_item.delete(0, tk.END)
+                    entrada_quantidade.delete(0, tk.END)
+                    entrada_valor.delete(0, tk.END)
+                    messagebox.showinfo("Sucesso", f"A quantidade e o preço de {item['nome']} foram atualizados")
+                    return
+            novo_item = {'nome': nome_digitado, 'quantidade': quantidade, 'valor': valor, 'comprado': False}
             lista_compras.append(novo_item)
             exibir_lista()
             calcular_total()
@@ -66,9 +86,11 @@ def alternar_status():
     if selecao:
         indice=selecao[0]
         lista_compras[indice]['comprado']=not lista_compras[indice]['comprado']
-    exibir_lista()
-    calcular_total()
-    messagebox.showinfo("Sucesso!", f"Status de {lista_compras[indice]['nome']} foi alterado.")
+        exibir_lista()
+        calcular_total()
+        messagebox.showinfo("Sucesso!", f"Status de {lista_compras[indice]['nome']} foi alterado.")
+    else:
+        messagebox.showerror("Erro", "Selecione um item para alterar o status")
 
 # Função para Calcular a Quantidade de Itens e o Preço Total
 def calcular_total():

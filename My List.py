@@ -60,15 +60,27 @@ def remover_item():
     else:
         messagebox.showerror("Erro", "Selecione um item para removê-lo")
 
+#Função para mudar o emoji de não comprado para comprado e vice-versa
+def alternar_status():
+    selecao = caixa_lista.curselection()
+    if selecao:
+        indice=selecao[0]
+        lista_compras[indice]['comprado']=not lista_compras[indice]['comprado']
+    exibir_lista()
+    calcular_total()
+    messagebox.showinfo("Sucesso!", f"Status de {lista_compras[indice]['nome']} foi alterado.")
 
 # Função para Calcular a Quantidade de Itens e o Preço Total
 def calcular_total():
     soma_valor=0.0
     soma_itens=0
+    soma_carrinho=0.0
     for item in lista_compras:
         soma_valor+=item['quantidade']*item['valor']
         soma_itens+=item['quantidade']
-    texto_total.set(f"Itens: {soma_itens}un | Preço Total: R${soma_valor:.2f}")
+        if item['comprado']:
+            soma_carrinho+=item['quantidade']*item['valor']
+    texto_total.set(f"Itens: {soma_itens}un | Total: R${soma_valor:.2f} | No Carrinho: R${soma_carrinho:.2f} ")
 
 
 # Função principal que constrói a interface
@@ -77,7 +89,7 @@ def main():
     janela = tk.Tk()
     janela.title("Lista de Compras")
     texto_total = tk.StringVar()
-    texto_total.set("Itens: 0 un | Preço Total: R$0.00")
+    texto_total.set("Itens: 0 un | Total: R$0.00 | No Carrinho: R$0.00")
 
     # Título principal da interface
     frame_titulo = tk.Frame(janela)
@@ -125,11 +137,11 @@ def main():
         row=4, column=0, columnspan=2, padx=5, pady=5, sticky="we"
     )
 
-    # Botão: Calcular Total
-    botao_calcular = tk.Button(
-        frame_conteudo, text="Calcular Total Geral", command=calcular_total
+    # Botão: Alternar Status
+    botao_status = tk.Button(
+        frame_conteudo, text="Marcar | Desmarcar", command=alternar_status
     )
-    botao_calcular.grid(
+    botao_status.grid(
         row=5, column=0, columnspan=2, padx=5, pady=5, sticky="we"
     )
 

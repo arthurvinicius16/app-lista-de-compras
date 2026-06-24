@@ -10,6 +10,21 @@ entrada_quantidade = None
 entrada_valor = None
 caixa_lista = None
 
+#Função para Salvar a Lista em Json
+def salvar_lista():
+    with open('lista.json', 'w') as file:
+        json.dump(lista_compras, file, indent=4)
+
+#Função para Carregar a Lista Json
+def carregar_lista():
+    global lista_compras
+    try:
+        with open('lista.json', 'r') as file:
+            lista_compras = json.load(file)
+        exibir_lista()
+        calcular_total()
+    except FileNotFoundError:
+        pass
 #Função para tornar a palavra inserida uma string sem espaços desnecessários, sem acento e totalmente minúscula
 def normalizar(texto):
     texto=texto.strip().lower().replace(" ", "")
@@ -33,20 +48,24 @@ def exibir_lista():
 
 def adicionar_item():
     global entrada_item, entrada_quantidade, entrada_valor
-    nome_digitado=entrada_item.get() #ele recebe a string da caixa de texto (.get) e remove espaços desnecessários, como no fim e início (.strip)
+    nome_digitado=entrada_item.get() #ele recebe a string da caixa de texto (.get)
     quantidade=entrada_quantidade.get()
-    valor=entrada_valor.get().replace(",",".")
-    if nome_digitado and quantidade and valor:
+    if nome_digitado and quantidade>0:
         try:
             quantidade=int(quantidade)
-            valor=float(valor)
             item_busca=normalizar(nome_digitado)
+            valor = entrada_valor.get().replace(",", ".")
+            if valor:
+                valor=float(valor)
+            else:
+                valor=0.0
             for item in lista_compras:
                 item_existe=normalizar(item['nome'])
                 if item_existe == item_busca:
                     item['quantidade']+=quantidade
                     item['valor']=valor
                     exibir_lista()
+                    salvar_lista()
                     calcular_total()
                     entrada_item.delete(0, tk.END)
                     entrada_quantidade.delete(0, tk.END)
@@ -56,6 +75,7 @@ def adicionar_item():
             novo_item = {'nome': nome_digitado, 'quantidade': quantidade, 'valor': valor, 'comprado': False}
             lista_compras.append(novo_item)
             exibir_lista()
+            salvar_lista()
             calcular_total()
             entrada_item.delete(0, tk.END)
             entrada_quantidade.delete(0, tk.END)
@@ -74,6 +94,7 @@ def remover_item():
        indice=selecao[0]
        item_removido=lista_compras.pop(indice)
        exibir_lista()
+       salvar_lista()
        calcular_total()
        messagebox.showinfo("Sucesso", f"{item_removido['nome']} foi removido da lista")
 
@@ -87,6 +108,7 @@ def alternar_status():
         indice=selecao[0]
         lista_compras[indice]['comprado']=not lista_compras[indice]['comprado']
         exibir_lista()
+        salvar_lista()
         calcular_total()
         messagebox.showinfo("Sucesso!", f"Status de {lista_compras[indice]['nome']} foi alterado.")
     else:
@@ -176,7 +198,7 @@ def main():
     #Rodapé da Quantidade e Preço Total
     label_rodape = tk.Label(frame_conteudo, textvariable=texto_total, font=("Helvetica", 10, "bold"))
     label_rodape.grid(row=7, column=0, columnspan=2, padx=5, pady=5, sticky="ew")
-
+    carregar_lista()
     janela.mainloop()
 
 

@@ -32,6 +32,17 @@ def normalizar(texto):
     texto=texto.encode("ascii", "ignore").decode("utf-8")
     return texto
 
+#Auxiliar para finalizar funções
+def finalizar(mensagem):
+    exibir_lista()
+    salvar_lista()
+    calcular_total()
+    entrada_item.delete(0, tk.END)
+    entrada_quantidade.delete(0, tk.END)
+    entrada_valor.delete(0, tk.END)
+    entrada_item.focus_set()
+    messagebox.showinfo("Sucesso", mensagem)
+
 # Função de Exibir/Atualizar a Lista
 def exibir_lista():
     global caixa_lista
@@ -50,76 +61,43 @@ def adicionar_item():
     global entrada_item, entrada_quantidade, entrada_valor
     nome_digitado=entrada_item.get().strip() #ele recebe a string da caixa de texto (.get)
     quantidade=entrada_quantidade.get().strip()
-    valor = entrada_valor.get().replace(",", ".")
-    if nome_digitado and quantidade:
-        try:
-            quantidade = int(quantidade)
-            if quantidade<0:
-                messagebox.showerror("Erro", "Somente quantidades maiores que 0")
-            item_busca=normalizar(nome_digitado)
-
-            if valor:
-                valor=float(valor)
-            else:
-                valor=0.0
-            for item in lista_compras:
-                item_existe=normalizar(item['nome'])
-                if item_existe == item_busca:
-                    item['quantidade']+=quantidade
-                    item['valor']=valor
-                    exibir_lista()
-                    salvar_lista()
-                    calcular_total()
-                    entrada_item.delete(0, tk.END)
-                    entrada_quantidade.delete(0, tk.END)
-                    entrada_valor.delete(0, tk.END)
-                    messagebox.showinfo("Sucesso", f"A quantidade e o preço de {item['nome']} foram atualizados")
-                    return
-            novo_item = {'nome': nome_digitado, 'quantidade': quantidade, 'valor': valor, 'comprado': False}
-            lista_compras.append(novo_item)
-            exibir_lista()
-            salvar_lista()
-            calcular_total()
-            entrada_item.delete(0, tk.END)
-            entrada_quantidade.delete(0, tk.END)
-            entrada_valor.delete(0, tk.END)
-            messagebox.showinfo("Sucesso",f"O item {nome_digitado} foi adicionado com sucesso.")
-        except ValueError:
-            messagebox.showerror("Erro","Insira caracteres válidos nos campos Quantidade e Preço (somente números)")
-    elif nome_digitado and quantidade==None:
-        try:
-            quantidade = 1
-            item_busca=normalizar(nome_digitado)
-            valor = entrada_valor.get().replace(",", ".")
-            if valor:
-                valor=float(valor)
-            else:
-                valor=0.0
-            for item in lista_compras:
-                item_existe=normalizar(item['nome'])
-                if item_existe == item_busca:
-                    item['quantidade']+=quantidade
-                    item['valor']=valor
-                    exibir_lista()
-                    salvar_lista()
-                    calcular_total()
-                    entrada_item.delete(0, tk.END)
-                    entrada_valor.delete(0, tk.END)
-                    messagebox.showinfo("Sucesso", f"A quantidade e o preço de {item['nome']} foram atualizados")
-                    return
-            novo_item = {'nome': nome_digitado, 'quantidade': quantidade, 'valor': valor, 'comprado': False}
-            lista_compras.append(novo_item)
-            exibir_lista()
-            salvar_lista()
-            calcular_total()
-            entrada_item.delete(0, tk.END)
-            entrada_quantidade.delete(0, tk.END)
-            entrada_valor.delete(0, tk.END)
-            messagebox.showinfo("Sucesso",f"O item {nome_digitado} foi adicionado com sucesso.")
-        except ValueError:
-            messagebox.showerror("Erro","Insira caracteres válidos nos campos Quantidade e Preço (somente números)")
+    valor = entrada_valor.get().replace(",", ".").strip()
+    if not nome_digitado:
+        messagebox.showerror("Erro", "Insira o nome do Item.")
+        return
+    if quantidade == "":
+        quantidade=1
     else:
-        messagebox.showerror("Erro","Por favor, preencha todos os campos (Item, Quantidade e Preço)")
+        try:
+            quantidade=int(quantidade)
+        except ValueError:
+            messagebox.showerror("Erro", "A quantidade deve ser um número inteiro")
+            return
+    if quantidade<=0:
+        messagebox.showerror("Erro", "Insira uma quantidade válida (maior que zero)")
+        return
+    if valor:
+        try:
+            valor=float(valor)
+            if valor<0:
+                messagebox.showerror("Erro", "Somente números positivos em 'Valor'")
+                return
+        except ValueError:
+            messagebox.showerror("Erro", "Insira somente números em 'Valor'")
+            return
+    else:
+        valor=0.0
+    item_busca = normalizar(nome_digitado)
+    for item in lista_compras:
+        item_existe = normalizar(item['nome'])
+        if item_existe == item_busca:
+            item['quantidade'] += quantidade
+            item['valor'] = valor
+            finalizar(f"O item {item['nome']} foi atualizado")
+            return
+    novo_item = {'nome': nome_digitado, 'quantidade': quantidade, 'valor': valor, 'comprado': False}
+    lista_compras.append(novo_item)
+    finalizar(f"{nome_digitado} foi adicionado")
 
 # Função de Remover Item
 

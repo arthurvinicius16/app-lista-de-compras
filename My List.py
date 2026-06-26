@@ -48,11 +48,47 @@ def exibir_lista():
 
 def adicionar_item():
     global entrada_item, entrada_quantidade, entrada_valor
-    nome_digitado=entrada_item.get() #ele recebe a string da caixa de texto (.get)
-    quantidade=entrada_quantidade.get()
-    if nome_digitado and quantidade>0:
+    nome_digitado=entrada_item.get().strip() #ele recebe a string da caixa de texto (.get)
+    quantidade=entrada_quantidade.get().strip()
+    valor = entrada_valor.get().replace(",", ".")
+    if nome_digitado and quantidade:
         try:
-            quantidade=int(quantidade)
+            quantidade = int(quantidade)
+            if quantidade<0:
+                messagebox.showerror("Erro", "Somente quantidades maiores que 0")
+            item_busca=normalizar(nome_digitado)
+
+            if valor:
+                valor=float(valor)
+            else:
+                valor=0.0
+            for item in lista_compras:
+                item_existe=normalizar(item['nome'])
+                if item_existe == item_busca:
+                    item['quantidade']+=quantidade
+                    item['valor']=valor
+                    exibir_lista()
+                    salvar_lista()
+                    calcular_total()
+                    entrada_item.delete(0, tk.END)
+                    entrada_quantidade.delete(0, tk.END)
+                    entrada_valor.delete(0, tk.END)
+                    messagebox.showinfo("Sucesso", f"A quantidade e o preço de {item['nome']} foram atualizados")
+                    return
+            novo_item = {'nome': nome_digitado, 'quantidade': quantidade, 'valor': valor, 'comprado': False}
+            lista_compras.append(novo_item)
+            exibir_lista()
+            salvar_lista()
+            calcular_total()
+            entrada_item.delete(0, tk.END)
+            entrada_quantidade.delete(0, tk.END)
+            entrada_valor.delete(0, tk.END)
+            messagebox.showinfo("Sucesso",f"O item {nome_digitado} foi adicionado com sucesso.")
+        except ValueError:
+            messagebox.showerror("Erro","Insira caracteres válidos nos campos Quantidade e Preço (somente números)")
+    elif nome_digitado and quantidade==None:
+        try:
+            quantidade = 1
             item_busca=normalizar(nome_digitado)
             valor = entrada_valor.get().replace(",", ".")
             if valor:
@@ -68,7 +104,6 @@ def adicionar_item():
                     salvar_lista()
                     calcular_total()
                     entrada_item.delete(0, tk.END)
-                    entrada_quantidade.delete(0, tk.END)
                     entrada_valor.delete(0, tk.END)
                     messagebox.showinfo("Sucesso", f"A quantidade e o preço de {item['nome']} foram atualizados")
                     return

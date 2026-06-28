@@ -156,7 +156,6 @@ def limpar_lista():
     if len(lista_compras) == 0:
         messagebox.showerror("Erro", "A lista já está vazia")
         return
-
     #Se a lista tiver itens, faz a pergunta ao usuário
     escolha = messagebox.askyesno("Escolha", "Deseja limpar toda a lista?")
     if escolha:
@@ -164,7 +163,7 @@ def limpar_lista():
         finalizar()
 
 #Função para mudar o emoji de não comprado para comprado e vice-versa
-def alternar_status():
+def alternar_status(event=None):
     selecao = caixa_lista.selection()
     if selecao:
         ID=selecao[0]
@@ -257,6 +256,7 @@ def main():
     caixa_lista.column("quantidade", width=60, anchor='center')
     caixa_lista.column("valor", width=100, anchor='center')
     caixa_lista.bind("<Delete>", remover_item)
+    caixa_lista.bind("<Double-1>", alternar_status)
     entrada_item.bind("<Return>", ir_quantidade)
     entrada_quantidade.bind("<Return>", ir_valor)
     entrada_valor.bind("<Return>", adicionar_item)

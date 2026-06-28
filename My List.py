@@ -217,6 +217,8 @@ def main():
 
     # Janela principal usando CTk
     janela = ctk.CTk()
+    janela.geometry("550x650")
+    janela.minsize(480, 580)
     janela.title("Lista de Compras")
 
     texto_total = tk.StringVar()
@@ -231,24 +233,26 @@ def main():
     # Área dos campos de entrada e botões
     frame_conteudo = ctk.CTkFrame(janela)
     frame_conteudo.pack(padx=15, pady=15, fill="both", expand=True)
+    frame_conteudo.grid_columnconfigure(1, weight=1)
+    frame_conteudo.grid_rowconfigure(7, weight=1)
 
     # Campo: Item
     label_item = ctk.CTkLabel(frame_conteudo, text="Item:")
-    label_item.grid(row=0, column=0, padx=10, pady=5, sticky="e")
+    label_item.grid(row=0, column=0, padx=10, pady=5, sticky="w")
     entrada_item = ctk.CTkEntry(frame_conteudo, width=200, placeholder_text="Ex:Argamassa")
-    entrada_item.grid(row=0, column=1, padx=10, pady=5, sticky="w")
+    entrada_item.grid(row=0, column=1, padx=10, pady=5, sticky="ew")
 
     # Campo: Quantidade
     label_quantidade = ctk.CTkLabel(frame_conteudo, text="Quantidade:")
-    label_quantidade.grid(row=1, column=0, padx=10, pady=5, sticky="e")
+    label_quantidade.grid(row=1, column=0, padx=10, pady=5, sticky="w")
     entrada_quantidade = ctk.CTkEntry(frame_conteudo, width=200, placeholder_text="(Opcional)")
-    entrada_quantidade.grid(row=1, column=1, padx=10, pady=5, sticky="w")
+    entrada_quantidade.grid(row=1, column=1, padx=10, pady=5, sticky="ew")
 
     # Campo: Preço
     label_valor = ctk.CTkLabel(frame_conteudo, text="Preço (R$):")
-    label_valor.grid(row=2, column=0, padx=10, pady=5, sticky="e")
+    label_valor.grid(row=2, column=0, padx=10, pady=5, sticky="w")
     entrada_valor = ctk.CTkEntry(frame_conteudo, width=200, placeholder_text="(Opcional)")
-    entrada_valor.grid(row=2, column=1, padx=10, pady=5, sticky="w")
+    entrada_valor.grid(row=2, column=1, padx=10, pady=5, sticky="ew")
 
     # Botão: Adicionar (Adicionado cantos arredondados padrão e cor diferenciada)
     botao_adicionar = ctk.CTkButton(frame_conteudo, text="Adicionar Item", command=adicionar_item, fg_color="#2ecc71",
@@ -283,7 +287,7 @@ def main():
     caixa_lista.heading("quantidade", text="Qtd", anchor='center')
     caixa_lista.heading("valor", text="Valor", anchor='center')
 
-    caixa_lista.column("status", width=60, anchor='center')
+    caixa_lista.column("status", width=60, anchor='center', stretch=False)
     caixa_lista.column("nome", width=190, anchor='w')
     caixa_lista.column("quantidade", width=60, anchor='center')
     caixa_lista.column("valor", width=90, anchor='center')

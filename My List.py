@@ -1,7 +1,7 @@
 import tkinter as tk
 from tkinter import ttk, messagebox
-import json
-import unicodedata
+import json #Importa a biblioteca de persistência de arquivos do programa, num tipo de arquivo .json nativo do python
+import unicodedata #Importa a biblioteca que retira qualquer acentuação ou símbolos de strings
 import customtkinter as ctk  # Importa o CustomTkinter
 
 # -------------------------------------------------------------------------
@@ -23,11 +23,13 @@ entrada_quantidade = None
 entrada_valor = None
 caixa_lista = None
 texto_total = None
+item_editar= None
+botao_adicionar=None
 
 
 # Função para Salvar a Lista em Json
 def salvar_lista():
-    with open('lista.json', 'w') as file:
+    with open('lista.json', 'w', encoding='utf-8') as file:
         json.dump(lista_compras, file, indent=4)
 
 
@@ -35,13 +37,12 @@ def salvar_lista():
 def carregar_lista():
     global lista_compras
     try:
-        with open('lista.json', 'r') as file:
+        with open('lista.json', 'r', encoding='utf-8') as file:
             lista_compras = json.load(file)
         exibir_lista()
         calcular_total()
-    except FileNotFoundError:
-        pass
-
+    except (FileNotFoundError,json.JSONDecodeError):
+        lista_compras=[]
 
 # Função para tornar a palavra inserida uma string sem espaços desnecessários, sem acento e totalmente minúscula
 def normalizar(texto):
@@ -55,10 +56,8 @@ def normalizar(texto):
 def ir_quantidade(event):
     entrada_quantidade.focus_set()
 
-
 def ir_valor(event):
     entrada_valor.focus_set()
-
 
 # Auxiliar para finalizar funções
 def finalizar():
@@ -68,7 +67,6 @@ def finalizar():
     entrada_item.delete(0, "end")
     entrada_quantidade.delete(0, "end")
     entrada_valor.delete(0, "end")
-
 
 # Função de Exibir/Atualizar a Lista
 def exibir_lista():
@@ -81,17 +79,14 @@ def exibir_lista():
         else:
             status = "❌"
         id_item = normalizar(item['nome'])
-        caixa_lista.insert("", tk.END, iid=id_item,
-                           values=(status, item['nome'], item['quantidade'], f"R${item['valor']:.2f}"))
-
+        caixa_lista.insert("", tk.END, iid=id_item,values=(status, item['nome'], item['quantidade'], f"R${item['valor']:.2f}"))
 
 # Função para Acrescentar Itens
 def adicionar_item(event=None):
-    global entrada_item, entrada_quantidade, entrada_valor
+    global entrada_item, entrada_quantidade, entrada_valor, item_editar, botao_adicionar
     nome_digitado = entrada_item.get().strip()
     quantidade = entrada_quantidade.get().strip()
     valor = entrada_valor.get().strip().replace(",", ".")
-
     if not nome_digitado:
         messagebox.showerror("Erro", "Insira o nome do Item.")
         entrada_item.focus_set()
@@ -109,7 +104,6 @@ def adicionar_item(event=None):
         messagebox.showerror("Erro", "Insira uma quantidade válida (maior que zero)")
         entrada_quantidade.focus_set()
         return
-
     valor_foi_digitado = False
     if valor:
         try:
@@ -125,7 +119,18 @@ def adicionar_item(event=None):
             return
     else:
         valor = 0.0
-
+    if item_editar is not None:
+        for item in lista_compras:
+            if normalizar(item['nome']) == item_editar:
+                item['nome']=nome_digitado
+                item['quantidade']=quantidade
+                item['valor']=valor
+                break
+        botao_adicionar.configure(text="Adicionar Item", fg_color="#2ecc71", hover_color="#27ae60")
+        item_editar = None
+        finalizar()
+        entrada_item.focus_set()
+        return
     item_busca = normalizar(nome_digitado)
     for item in lista_compras:
         item_existe = normalizar(item['nome'])
@@ -136,7 +141,6 @@ def adicionar_item(event=None):
             finalizar()
             entrada_item.focus_set()
             return
-
     novo_item = {'nome': nome_digitado, 'quantidade': quantidade, 'valor': valor, 'comprado': False}
     lista_compras.append(novo_item)
     finalizar()
@@ -171,7 +175,7 @@ def remover_item(event=None):
 
 
 # Função para Limpar a Lista
-def limpar_lista():
+def limpar_lista(event=None):
     if len(lista_compras) == 0:
         messagebox.showerror("Erro", "A lista já está vazia")
         return
@@ -180,20 +184,38 @@ def limpar_lista():
         lista_compras.clear()
         finalizar()
 
+#Função para Editar Itens Existentes
+def editar_item(event=None):
+    global item_editar, botao_adicionar
+    selecao = caixa_lista.selection()
+    if not selecao:
+        messagebox.showerror("Erro", "Selecione um item para editar")
+        return
+    item_editar = selecao[0]
+    for item in lista_compras:
+        if item_editar == normalizar(item['nome']):
+            entrada_item.delete(0, tk.END)
+            entrada_quantidade.delete(0, tk.END)
+            entrada_valor.delete(0, tk.END)
+            entrada_item.insert(0, item['nome'])
+            entrada_quantidade.insert(0, str(item['quantidade']))
+            entrada_valor.insert(0, f"{item['valor']:.2f}")
+            botao_adicionar.configure(text="Salvar Alterações", fg_color="#3498db", hover_color="#2980b9")
+            return
 
 # Função para mudar o emoji de comprado/não comprado
 def alternar_status(event=None):
     selecao = caixa_lista.selection()
     if selecao:
         ID = selecao[0]
-        indice = caixa_lista.index(ID)
-        lista_compras[indice]['comprado'] = not lista_compras[indice]['comprado']
-        finalizar()
-        linhas = caixa_lista.get_children()
-        id_foco = linhas[indice]
-        caixa_lista.selection_set(id_foco)
-        caixa_lista.focus(id_foco)
-        caixa_lista.focus_set()
+        for item in lista_compras:
+            if ID==normalizar(item['nome']):
+                item['comprado'] = not item['comprado']
+                finalizar()
+                caixa_lista.selection_set(ID)
+                caixa_lista.focus(ID)
+                caixa_lista.focus_set()
+                return
     else:
         messagebox.showerror("Erro", "Selecione um item para alterar o status")
 
@@ -213,7 +235,7 @@ def calcular_total():
 
 # Função principal da interface
 def main():
-    global entrada_item, entrada_quantidade, caixa_lista, entrada_valor, texto_total
+    global entrada_item, entrada_quantidade, caixa_lista, entrada_valor, texto_total, botao_adicionar
 
     # Janela principal usando CTk
     janela = ctk.CTk()
@@ -255,18 +277,15 @@ def main():
     entrada_valor.grid(row=2, column=1, padx=10, pady=5, sticky="ew")
 
     # Botão: Adicionar (Adicionado cantos arredondados padrão e cor diferenciada)
-    botao_adicionar = ctk.CTkButton(frame_conteudo, text="Adicionar Item", command=adicionar_item, fg_color="#2ecc71",
-                                    hover_color="#27ae60")
+    botao_adicionar = ctk.CTkButton(frame_conteudo, text="Adicionar Item", command=adicionar_item, fg_color="#2ecc71",hover_color="#27ae60")
     botao_adicionar.grid(row=3, column=0, columnspan=2, padx=10, pady=5, sticky="we")
 
     # Botão: Remover
-    botao_remover = ctk.CTkButton(frame_conteudo, text="Remover Item", command=remover_item, fg_color="#e74c3c",
-                                  hover_color="#c0392b")
+    botao_remover = ctk.CTkButton(frame_conteudo, text="Remover Item", command=remover_item, fg_color="#e74c3c",hover_color="#c0392b")
     botao_remover.grid(row=4, column=0, columnspan=2, padx=10, pady=5, sticky="we")
 
     # Botão: Limpar
-    botao_limpar = ctk.CTkButton(frame_conteudo, text="Limpar Lista", command=limpar_lista, fg_color="#f39c12",
-                                 hover_color="#d35400")
+    botao_limpar = ctk.CTkButton(frame_conteudo, text="Limpar Lista", command=limpar_lista, fg_color="#f39c12",hover_color="#d35400")
     botao_limpar.grid(row=5, column=0, columnspan=2, padx=10, pady=5, sticky="we")
 
     # Botão: Alternar Status
@@ -304,6 +323,7 @@ def main():
     entrada_quantidade.bind("<Return>", ir_valor)
     entrada_valor.bind("<Return>", adicionar_item)
     janela.bind("<Shift-Delete>", limpar_lista)
+    caixa_lista.bind("<Return>", editar_item)
 
     # Rodapé da Quantidade e Preço Total
     label_rodape = ctk.CTkLabel(frame_conteudo, textvariable=texto_total, font=("Helvetica", 17, "bold"))

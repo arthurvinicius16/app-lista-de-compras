@@ -121,6 +121,9 @@ def adicionar_item(event=None):
         valor = 0.0
     if item_editar is not None:
         for item in lista_compras:
+            if normalizar(nome_digitado) == normalizar(item['nome']) and normalizar(item['nome']) != item_editar:
+                messagebox.showerror("Erro", f"{item['nome']} já está na lista")
+                return
             if normalizar(item['nome']) == item_editar:
                 item['nome']=nome_digitado
                 item['quantidade']=quantidade
@@ -241,7 +244,7 @@ def main():
     janela = ctk.CTk()
     janela.geometry("550x650")
     janela.minsize(480, 580)
-    janela.title("Lista de Compras")
+    janela.title("Minha Lista de Compras")
 
     texto_total = tk.StringVar()
     texto_total.set("Itens: 0 un | Total: R$0.00 | No Carrinho: R$0.00")
@@ -249,7 +252,7 @@ def main():
     # Título principal da interface
     frame_titulo = ctk.CTkFrame(janela, fg_color="transparent")
     frame_titulo.pack(padx=10, pady=10)
-    label_titulo = ctk.CTkLabel(frame_titulo, text="LISTA DE COMPRAS", font=("Helvetica", 24, "bold"))
+    label_titulo = ctk.CTkLabel(frame_titulo, text="Minha Lista de Compras", font=("Segoe UI", 28, "bold"))
     label_titulo.pack()
 
     # Área dos campos de entrada e botões
@@ -259,37 +262,40 @@ def main():
     frame_conteudo.grid_rowconfigure(7, weight=1)
 
     # Campo: Item
-    label_item = ctk.CTkLabel(frame_conteudo, text="Item:")
+    label_item = ctk.CTkLabel(frame_conteudo, text="Item:", font=("Segoe UI", 14, "bold"))
     label_item.grid(row=0, column=0, padx=10, pady=5, sticky="w")
-    entrada_item = ctk.CTkEntry(frame_conteudo, width=200, placeholder_text="Ex:Argamassa")
+    entrada_item = ctk.CTkEntry(frame_conteudo,width=200,placeholder_text="Ex: Argamassa",font=("Segoe UI", 14))
     entrada_item.grid(row=0, column=1, padx=10, pady=5, sticky="ew")
 
     # Campo: Quantidade
-    label_quantidade = ctk.CTkLabel(frame_conteudo, text="Quantidade:")
+    label_quantidade = ctk.CTkLabel(frame_conteudo,text="Quantidade:",font=("Segoe UI", 14, "bold"))
     label_quantidade.grid(row=1, column=0, padx=10, pady=5, sticky="w")
-    entrada_quantidade = ctk.CTkEntry(frame_conteudo, width=200, placeholder_text="(Opcional)")
+    entrada_quantidade = ctk.CTkEntry(frame_conteudo,width=200,placeholder_text="(Opcional)",font=("Segoe UI", 14))
     entrada_quantidade.grid(row=1, column=1, padx=10, pady=5, sticky="ew")
 
     # Campo: Preço
-    label_valor = ctk.CTkLabel(frame_conteudo, text="Preço (R$):")
+    label_valor = ctk.CTkLabel(frame_conteudo,text="Preço (R$):",font=("Segoe UI", 14, "bold"))
     label_valor.grid(row=2, column=0, padx=10, pady=5, sticky="w")
-    entrada_valor = ctk.CTkEntry(frame_conteudo, width=200, placeholder_text="(Opcional)")
+    entrada_valor = ctk.CTkEntry(frame_conteudo,width=200,placeholder_text="(Opcional)",font=("Segoe UI", 14))
     entrada_valor.grid(row=2, column=1, padx=10, pady=5, sticky="ew")
 
     # Botão: Adicionar (Adicionado cantos arredondados padrão e cor diferenciada)
-    botao_adicionar = ctk.CTkButton(frame_conteudo, text="Adicionar Item", command=adicionar_item, fg_color="#2ecc71",hover_color="#27ae60")
+    botao_adicionar = ctk.CTkButton(frame_conteudo, text="Adicionar Item", command=adicionar_item, fg_color="#2ecc71",hover_color="#27ae60", font=("Segoe UI", 15, "bold"),height=38)
     botao_adicionar.grid(row=3, column=0, columnspan=2, padx=10, pady=5, sticky="we")
 
     # Botão: Remover
-    botao_remover = ctk.CTkButton(frame_conteudo, text="Remover Item", command=remover_item, fg_color="#e74c3c",hover_color="#c0392b")
+    botao_remover = ctk.CTkButton(frame_conteudo, text="Remover Item", command=remover_item, fg_color="#e74c3c",hover_color="#c0392b",
+    font=("Segoe UI", 15, "bold"),height=38)
     botao_remover.grid(row=4, column=0, columnspan=2, padx=10, pady=5, sticky="we")
 
     # Botão: Limpar
-    botao_limpar = ctk.CTkButton(frame_conteudo, text="Limpar Lista", command=limpar_lista, fg_color="#f39c12",hover_color="#d35400")
+    botao_limpar = ctk.CTkButton(frame_conteudo, text="Limpar Lista", command=limpar_lista, fg_color="#f39c12",hover_color="#d35400",font=("Segoe UI", 15, "bold"),
+height=38)
     botao_limpar.grid(row=5, column=0, columnspan=2, padx=10, pady=5, sticky="we")
 
     # Botão: Alternar Status
-    botao_status = ctk.CTkButton(frame_conteudo, text="Marcar | Desmarcar", command=alternar_status)
+    botao_status = ctk.CTkButton(frame_conteudo, text="Marcar | Desmarcar", command=alternar_status, font=("Segoe UI", 15, "bold"),
+height=38)
     botao_status.grid(row=6, column=0, columnspan=2, padx=10, pady=5, sticky="we")
 
     # Configuração de estilo para o Treeview se adaptar melhor visualmente

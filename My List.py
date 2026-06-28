@@ -136,12 +136,16 @@ def remover_item(event=None):
     else:
         messagebox.showerror("Erro", "Selecione um item para removê-lo")
 
-#Função para Limpar a Lista
+
+# Função para Limpar a Lista
 def limpar_lista():
-    escolha=messagebox.askyesno("Escolha", "Deseja limpar toda a lista?")
-    if len(lista_compras)==0:
+    #Verifica se a lista já está vazia antes de perguntar
+    if len(lista_compras) == 0:
         messagebox.showerror("Erro", "A lista já está vazia")
         return
+
+   #Se a lista tiver itens, faz a pergunta ao usuário
+    escolha = messagebox.askyesno("Escolha", "Deseja limpar toda a lista?")
     if escolha:
         lista_compras.clear()
         finalizar()

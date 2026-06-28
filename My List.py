@@ -4,6 +4,13 @@ import json
 from tkinter import messagebox
 import unicodedata
 
+# -------------------------------------------------------------------------
+# FONTES DE INSPIRAÇÃO E RECURSOS UTILIZADOS:
+# Código Base de Interface: Adaptado de repositórios públicos do GitHub.
+# Créditos: https://github.com/Mehnaz2004/Tkinter-ShoppingList.git
+# Co-pilotagem e Mentoria de Desenvolvimento: Utilização de IA (Gemini e ChatGPT) para validação de dados, tratamento de exceções e testes de usabilidade.
+# -------------------------------------------------------------------------
+
 # Variáveis globais
 lista_compras = [] # Inicializa uma lista de compras vazia
 entrada_item = None
@@ -59,7 +66,8 @@ def exibir_lista():
             status="✅"
         else:
             status="❌"
-        caixa_lista.insert("", tk.END, values=(status, item['nome'], item['quantidade'], f"R${item['valor']:.2f}"))
+        id_item=normalizar(item['nome'])
+        caixa_lista.insert("", tk.END, iid=id_item, values=(status, item['nome'], item['quantidade'], f"R${item['valor']:.2f}"))
 
 # Função para Acrescentar Itens
 
@@ -70,6 +78,7 @@ def adicionar_item(event=None):
     valor = entrada_valor.get().strip().replace(",", ".")
     if not nome_digitado:
         messagebox.showerror("Erro", "Insira o nome do Item.")
+        entrada_item.focus_set()
         return
     if quantidade == "":
         quantidade=1
@@ -78,9 +87,11 @@ def adicionar_item(event=None):
             quantidade=int(quantidade)
         except ValueError:
             messagebox.showerror("Erro", "A quantidade deve ser um número inteiro")
+            entrada_quantidade.focus_set()
             return
     if quantidade<=0:
         messagebox.showerror("Erro", "Insira uma quantidade válida (maior que zero)")
+        entrada_quantidade.focus_set()
         return
     valor_foi_digitado = False
     if valor:
@@ -88,10 +99,12 @@ def adicionar_item(event=None):
             valor=float(valor)
             if valor<0:
                 messagebox.showerror("Erro", "Somente números positivos em 'Valor'")
+                entrada_valor.focus_set()
                 return
             valor_foi_digitado=True
         except ValueError:
             messagebox.showerror("Erro", "Insira somente números em 'Valor'")
+            entrada_valor.focus_set()
             return
     else:
         valor=0.0
@@ -113,38 +126,38 @@ def adicionar_item(event=None):
 # Função de Remover Item
 
 def remover_item(event=None):
+    global lista_compras
     selecao = caixa_lista.selection()
     if selecao:
        ID=selecao[0]
-       indice=caixa_lista.index(ID)
-       prox_id=caixa_lista.next(ID)
-       anterior_id=caixa_lista.prev(ID)
+       lista_aux=[]
+       prox_id = caixa_lista.next(ID)
+       anterior_id = caixa_lista.prev(ID)
        if prox_id:
-           subs=prox_id
+           subs = prox_id
        else:
-           subs=anterior_id
-       item_removido=lista_compras.pop(indice)
+           subs = anterior_id
+       for item in lista_compras:
+           if ID!=normalizar(item['nome']):
+               lista_aux.append(item)
+       lista_compras=lista_aux
        finalizar()
-       linhas=caixa_lista.get_children()
-       if linhas:
-           if indice>=len(linhas):
-               indice=len(linhas)-1
-           id_foco=linhas[indice]
-           caixa_lista.selection_set(id_foco)
-           caixa_lista.focus(id_foco)
-           caixa_lista.focus_set()
+       if not subs:
+           return
+       caixa_lista.selection_set(subs)
+       caixa_lista.focus(subs)
+       caixa_lista.focus_set()
     else:
         messagebox.showerror("Erro", "Selecione um item para removê-lo")
 
-
 # Função para Limpar a Lista
 def limpar_lista():
-    #Verifica se a lista já está vazia antes de perguntar
+    #Verifica se a lista já está vazia
     if len(lista_compras) == 0:
         messagebox.showerror("Erro", "A lista já está vazia")
         return
 
-   #Se a lista tiver itens, faz a pergunta ao usuário
+    #Se a lista tiver itens, faz a pergunta ao usuário
     escolha = messagebox.askyesno("Escolha", "Deseja limpar toda a lista?")
     if escolha:
         lista_compras.clear()
@@ -247,6 +260,7 @@ def main():
     entrada_item.bind("<Return>", ir_quantidade)
     entrada_quantidade.bind("<Return>", ir_valor)
     entrada_valor.bind("<Return>", adicionar_item)
+    janela.bind("<Shift-Delete>", limpar_lista)
 
 
     #Rodapé da Quantidade e Preço Total

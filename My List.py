@@ -64,9 +64,9 @@ def finalizar():
     exibir_lista()
     salvar_lista()
     calcular_total()
-    entrada_item.delete(0, "end")
-    entrada_quantidade.delete(0, "end")
-    entrada_valor.delete(0, "end")
+    entrada_item.delete(0, tk.END)
+    entrada_quantidade.delete(0, tk.END)
+    entrada_valor.delete(0, tk.END)
 
 # Função de Exibir/Atualizar a Lista
 def exibir_lista():
@@ -152,7 +152,7 @@ def adicionar_item(event=None):
 
 # Função de Remover Item
 def remover_item(event=None):
-    global lista_compras
+    global lista_compras, item_editar, botao_adicionar
     selecao = caixa_lista.selection()
     if selecao:
         ID = selecao[0]
@@ -167,6 +167,8 @@ def remover_item(event=None):
             if ID != normalizar(item['nome']):
                 lista_aux.append(item)
         lista_compras = lista_aux
+        item_editar = None
+        botao_adicionar.configure(text="Adicionar Item", fg_color="#2ecc71", hover_color="#27ae60")
         finalizar()
         if not subs:
             return
@@ -179,11 +181,15 @@ def remover_item(event=None):
 
 # Função para Limpar a Lista
 def limpar_lista(event=None):
+    global item_editar, botao_adicionar
     if len(lista_compras) == 0:
         messagebox.showerror("Erro", "A lista já está vazia")
         return
     escolha = messagebox.askyesno("Escolha", "Deseja limpar toda a lista?")
     if escolha:
+        item_editar = None
+        botao_adicionar.configure(text="Adicionar Item", fg_color="#2ecc71", hover_color="#27ae60")
+
         lista_compras.clear()
         finalizar()
 
@@ -204,6 +210,7 @@ def editar_item(event=None):
             entrada_quantidade.insert(0, str(item['quantidade']))
             entrada_valor.insert(0, f"{item['valor']:.2f}")
             botao_adicionar.configure(text="Salvar Alterações", fg_color="#3498db", hover_color="#2980b9")
+            entrada_item.focus_set()
             return
 
 # Função para mudar o emoji de comprado/não comprado
@@ -301,7 +308,8 @@ height=38)
     # Configuração de estilo para o Treeview se adaptar melhor visualmente
     estilo_tabela = ttk.Style()
     estilo_tabela.theme_use("clam")
-    estilo_tabela.configure("Treeview", rowheight=25)
+    estilo_tabela.configure("Treeview", rowheight=28, font=("Segoe UI", 10))
+    estilo_tabela.configure("Treeview.Heading", font=("Segoe UI", 10, "bold"))
 
     # Listbox/Treeview (Mantido ttk.Treeview pois o ctk não possui tabela nativa)
     caixa_lista = ttk.Treeview(frame_conteudo, columns=("status", "nome", "quantidade", "valor"), show="headings")
